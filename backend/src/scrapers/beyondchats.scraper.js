@@ -3,9 +3,53 @@ import axios from "axios";
 import * as cheerio from "cheerio";
 import mongoose from "mongoose";
 import connectDB from "../db/db.js";
+import Article from "../models/article.model.js";
 
 const BASE_URL = "https://beyondchats.com/blogs/";
 
+async function scrapeArticle(url) {
+  try {
+    const { data } = await axios.get(url);
+    const $ = cheerio.load(data);
+
+    const title = $(".e-con-inner h1").first().text().trim();
+
+    console.log("Title:", title);
+
+    const author = $("li[itemprop='author'] span").first().text().trim();
+
+    console.log("Author:", author);
+
+    const publishedAtText = $("li[itemprop='datePublished'] time")
+      .first()
+      .text()
+      .trim();
+
+    const publishedAt = publishedAtText ? new Date(publishedAtText) : null;
+
+    console.log("Published at:", publishedAt);
+
+    const content = $(".elementor-widget-theme-post-content")
+      .find("p, h2, h3, ul, ol, li")
+      .map((_, el) => $(el).text().trim())
+      .get()
+      .filter((text) => text.length > 0)
+      .join("\n\n");
+
+    console.log("Content:", content.slice(0, 200), "...");
+
+    return {
+      title,
+      content,
+      author,
+      publishedAt,
+      sourceUrl: url,
+      version: "original",
+    };
+  } catch (error) {
+    console.error("Error scraping article:", error);
+  }
+}
 async function scrapeBeyondChats() {
   try {
     await connectDB();
@@ -60,8 +104,35 @@ async function scrapeBeyondChats() {
     }
 
     console.log("Oldest 5 articles:", collectedLinks);
+
+    // saving to db
+    for (const url of collectedLinks) {
+      try {
+        const articleData = await scrapeArticle(url);
+
+        const exists = await Article.findOne({ sourceUrl: url });
+
+        if (exists) {
+          console.log("Skipping existing article");
+          continue;
+        }
+
+        await Article.create({
+          title: articleData.title,
+          content: articleData.content,
+          sourceUrl: articleData.sourceUrl,
+          author: articleData.author,
+          publishedAt: articleData.publishedAt,
+          source: "beyondchats",
+        });
+        console.log("Saved:", articleData.title);
+      } catch (err) {
+        console.error("Error saving article:", err);
+        console.error("Failed to scrape:", url);
+      }
+    }
   } catch (error) {
-    console.error("Scraper error:", error.message);
+    console.error("Scraper error:", error);
   } finally {
     mongoose.connection.close();
   }
