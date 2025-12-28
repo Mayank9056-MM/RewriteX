@@ -13,8 +13,14 @@ const articleSchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["beyondchats", "ai"],
+      enum: ["beyondchats", "ai", "user"],
       required: [true, "source is required"],
+      default: "user",
+    },
+    author: {
+      type: String,
+      trim: true,
+      default: "Unknown",
     },
     originalArticleId: {
       type: mongoose.Types.ObjectId,

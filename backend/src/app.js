@@ -39,6 +39,10 @@ if (process.env.NODE_ENV === "development") {
   );
 }
 
+import articleRouter from "./routes/article.route.js";
+
+app.use("/api/v1", articleRouter);
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
