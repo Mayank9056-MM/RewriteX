@@ -27,6 +27,16 @@ const articleSchema = new mongoose.Schema(
       ref: "Article",
       default: null,
     },
+    publishedAt: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+    sourceUrl: {
+      type: String,
+      unique: true,
+      index: true,
+    },
     references: {
       type: [String],
       default: [],
