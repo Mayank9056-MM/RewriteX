@@ -1,0 +1,33 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "AI powered increase page rank application",
+  "keywords": [
+    "AI",
+    "node",
+    "express"
+  ],
+  "homepage": "https://github.com/Mayank9056-MM/RewriteX#readme",
+  "bugs": {
+    "url": "https://github.com/Mayank9056-MM/RewriteX/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mayank9056-MM/RewriteX.git"
+  },
+  "license": "ISC",
+  "author": "Mayank Mahajan",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongoose": "^9.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
