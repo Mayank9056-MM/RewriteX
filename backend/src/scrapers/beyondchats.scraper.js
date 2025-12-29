@@ -7,6 +7,12 @@ import Article from "../models/article.model.js";
 
 const BASE_URL = "https://beyondchats.com/blogs/";
 
+/**
+ * Scrapes an article from Beyond Chats
+ * @param {string} url - Article URL
+ * @returns {Promise<Object>} - Scraped article data
+ * @throws {Error} - Scraper error
+ */
 async function scrapeArticle(url) {
   try {
     const { data } = await axios.get(url);
@@ -50,6 +56,12 @@ async function scrapeArticle(url) {
     console.error("Error scraping article:", error);
   }
 }
+
+/**
+ * Scrapes articles from Beyond Chats
+ * @returns {Promise<void>} - Scrape result
+ * @throws {Error} - Scraper error
+ */
 async function scrapeBeyondChats() {
   try {
     await connectDB();
