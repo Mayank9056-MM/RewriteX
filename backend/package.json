@@ -20,6 +20,7 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
+    "rewrite": "node src/jobs/rewrite.job.js",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
@@ -30,7 +31,8 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "mongoose": "^9.0.2"
+    "mongoose": "^9.0.2",
+    "openai": "^6.15.0"
   },
   "devDependencies": {
     "morgan": "^1.10.1",
