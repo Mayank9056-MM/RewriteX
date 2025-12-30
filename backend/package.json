@@ -35,10 +35,10 @@
     "mongoose": "^9.0.2",
     "morgan": "^1.10.1",
     "openai": "^6.15.0",
-    "sanitize-html": "^2.17.0"
+    "sanitize-html": "^2.17.0",
+    "winston": "^3.19.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.11",
-    "winston": "^3.19.0"
+    "nodemon": "^3.1.11"
   }
 }
