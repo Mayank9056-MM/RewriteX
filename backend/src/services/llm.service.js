@@ -54,7 +54,7 @@ function extractJSON(text) {
 }
 
 /**
- * Rewrite an article using LLaMAI to improve clarity, structure, and SEO quality
+ * Rewrite an article using LLM to improve clarity, structure, and SEO quality
  * @param {Object} originalArticle - Original article data
  * @param {string[]} referenceArticles - Reference article content
  * @returns {Promise<Object>} - Rewritten article data
@@ -65,43 +65,31 @@ export default async function rewriteWithLLM(
   referenceArticles
 ) {
   try {
-    const systemPrompt = `
-                        You are an expert SEO content editor.
-                        User will provide you with an original article and up to two reference articles.
-                        reference articles are high-quality examples to guide your rewriting.
-                        make your output superior to the original by leveraging the references.
+    const systemPrompt = `You are an expert SEO content editor. User will provide you with an original article and up to two reference articles. Reference articles are high-quality examples to guide your rewriting. Make your output superior to the original by leveraging the references.
 
-                        Your job is to rewrite articles to improve clarity, structure, and SEO quality.
-                        Follow instructions strictly and return only valid HTML.
-                        Do not explain your reasoning.
+Your job is to rewrite articles to improve clarity, structure, and SEO quality. Follow instructions strictly and return only valid JSON. Do not explain your reasoning.
 
-                        TASK:
-                        - Improve structure and readability
-                        - Use proper headings (h2, h3)
-                        - Add bullet points where useful
-                        - Expand explanations where helpful
-                        - Preserve original meaning
-                        - Do NOT plagiarize
-                        - Keep tone professional and informative
-                        - Add the reference article URLs to the references array.
+TASK:
+- Improve structure and readability
+- Use proper headings (h2, h3)
+- Add bullet points where useful
+- Expand explanations where helpful
+- Preserve original meaning
+- Do NOT plagiarize
+- Keep tone professional and informative
 
-                        OUTPUT FORMAT:
-                        Return ONLY a valid JSON object with the following shape:
+OUTPUT FORMAT:
+Return ONLY a valid JSON object with the following shape:
 
-                        {
-                          "title": "string",
-                          "content": "string (HTML)",
-                          "source": "ai",
-                          "references": ["string"],
-                          "author": "ai"
-                        }
+{
+  "title": "string",
+  "content": "string (HTML)",
+  "source": "ai",
+  "references": [],
+  "author": "ai"
+}
 
-                        You MUST return ONLY a valid JSON object.
-                        DO NOT wrap output in markdown.
-                        DO NOT include `````` markers.
-                        DO NOT include explanations.
-                        DO NOT include trailing commas.
-                        `;
+You MUST return ONLY a valid JSON object. DO NOT wrap output in markdown. DO NOT include backtick markers. DO NOT include explanations. DO NOT include trailing commas.`;
 
     const { originalContent, references } = normalizeLLMInput(
       originalArticle,
@@ -115,7 +103,7 @@ export default async function rewriteWithLLM(
     const userPrompt = buildUserPrompt(originalContent, references);
 
     const completion = await client.chat.completions.create({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash-exp",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
@@ -126,7 +114,6 @@ export default async function rewriteWithLLM(
     const raw = completion.choices[0].message.content;
 
     console.log("🧠 LLM rewrite completed");
-    console.log(raw);
 
     let parsed;
     try {
@@ -134,7 +121,6 @@ export default async function rewriteWithLLM(
       parsed = JSON.parse(jsonString);
     } catch (error) {
       console.error("Raw LLM output:\n", raw);
-      console.log(error);
       throw new Error("LLM output is not valid JSON");
     }
     return parsed;
