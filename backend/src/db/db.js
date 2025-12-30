@@ -1,9 +1,12 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import { DB_NAME } from "../contants.js";
 
 const connectDB = async () => {
   try {
     const mongoUri = process.env.MONGODB_URI;
+
+    console.log(mongoUri,"mongoUri");
 
     if (!mongoUri) {
       throw new Error("MONGODB_URI not found in env");
