@@ -1,0 +1,22 @@
+<svg
+  width="64"
+  height="64"
+  viewBox="0 0 64 64"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <!-- Background -->
+  <rect width="64" height="64" rx="14" fill="#0F172A"/>
+
+  <!-- Stylized R -->
+  <path
+    d="M18 44V18H30C35 18 38 21 38 26C38 30 35.5 32.5 32.5 33L40 44H33L26.5 34H24V44H18Z"
+    fill="#38BDF8"
+  />
+
+  <!-- X Symbol -->
+  <path
+    d="M40 24L46 32L40 40H45L48.5 35L52 40H56L50 32L56 24H52L48.5 29L45 24H40Z"
+    fill="#FFFFFF"
+  />
+</svg>
