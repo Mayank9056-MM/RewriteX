@@ -21,6 +21,7 @@
   "main": "src/index.js",
   "scripts": {
     "rewrite": "node src/jobs/rewrite.job.js",
+    "scraper": "node src/scrapers/beyondchats.scraper.js",
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
