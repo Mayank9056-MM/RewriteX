@@ -6,6 +6,53 @@ const client = new OpenAI({
   baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/",
 });
 
+function normalizeLLMInput(originalArticle, referenceArticles) {
+  return {
+    originalContent:
+      typeof originalArticle?.content === "string"
+        ? originalArticle.content
+        : "",
+
+    references: referenceArticles
+      .filter((r) => typeof r === "string")
+      .slice(0, 2),
+  };
+}
+
+function buildUserPrompt(original, refs) {
+  return `
+ORIGINAL ARTICLE:
+${original}
+
+REFERENCE ARTICLE 1:
+${refs[0] || ""}
+
+REFERENCE ARTICLE 2:
+${refs[1] || ""}
+`;
+}
+
+/**
+ * Extracts the JSON object from the provided text by removing markdown code fences.
+ * Throws an error if no JSON object is found in the LLM output.
+ */
+function extractJSON(text) {
+  // Remove markdown code fences if present
+  const cleaned = text
+    .replace(/```json/g, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+
+  if (start === -1 || end === -1) {
+    throw new Error("No JSON object found in LLM output");
+  }
+
+  return cleaned.slice(start, end + 1);
+}
+
 /**
  * Rewrite an article using LLaMAI to improve clarity, structure, and SEO quality
  * @param {Object} originalArticle - Original article data
@@ -19,51 +66,53 @@ export default async function rewriteWithLLM(
 ) {
   try {
     const systemPrompt = `
-You are an expert SEO content editor.
-User will provide you with an original article and up to two reference articles.
-reference articles are high-quality examples to guide your rewriting.
-make your output superior to the original by leveraging the references.
+                        You are an expert SEO content editor.
+                        User will provide you with an original article and up to two reference articles.
+                        reference articles are high-quality examples to guide your rewriting.
+                        make your output superior to the original by leveraging the references.
 
-Your job is to rewrite articles to improve clarity, structure, and SEO quality.
-Follow instructions strictly and return only valid HTML.
-You may include references ONLY in the JSON output when explicitly requested.
-Do not explain your reasoning.
-`;
+                        Your job is to rewrite articles to improve clarity, structure, and SEO quality.
+                        Follow instructions strictly and return only valid HTML.
+                        Do not explain your reasoning.
 
-    const userPrompt = `
-ORIGINAL ARTICLE:
-${originalArticle.content}
+                        TASK:
+                        - Improve structure and readability
+                        - Use proper headings (h2, h3)
+                        - Add bullet points where useful
+                        - Expand explanations where helpful
+                        - Preserve original meaning
+                        - Do NOT plagiarize
+                        - Keep tone professional and informative
+                        - Add the reference article URLs to the references array.
 
-REFERENCE ARTICLE 1:
-${referenceArticles[0]}
+                        OUTPUT FORMAT:
+                        Return ONLY a valid JSON object with the following shape:
 
-REFERENCE ARTICLE 2:
-${referenceArticles[1]}
+                        {
+                          "title": "string",
+                          "content": "string (HTML)",
+                          "source": "ai",
+                          "references": ["string"],
+                          "author": "ai"
+                        }
 
-TASK:
-- Improve structure and readability
-- Use proper headings (h2, h3)
-- Add bullet points where useful
-- Expand explanations where helpful
-- Preserve original meaning
-- Do NOT plagiarize
-- Keep tone professional and informative
-- Add the reference article URLs to the references array.
+                        You MUST return ONLY a valid JSON object.
+                        DO NOT wrap output in markdown.
+                        DO NOT include `````` markers.
+                        DO NOT include explanations.
+                        DO NOT include trailing commas.
+                        `;
 
-OUTPUT FORMAT:
-Return ONLY a valid JSON object with the following shape:
+    const { originalContent, references } = normalizeLLMInput(
+      originalArticle,
+      referenceArticles
+    );
 
-{
-  "title": "string",
-  "content": "string (HTML)",
-  "source": "ai",
-  "references": ["string"],
-  "author": "ai"
-}
+    if (!originalContent || references.length < 2) {
+      throw new Error("Invalid LLM input data");
+    }
 
-Do NOT add any extra text.
-Do NOT wrap in markdown.
-`;
+    const userPrompt = buildUserPrompt(originalContent, references);
 
     const completion = await client.chat.completions.create({
       model: "gemini-2.5-flash",
@@ -74,19 +123,20 @@ Do NOT wrap in markdown.
       temperature: 0.7,
     });
 
-    const rewrittenContent = completion.choices[0].message.content;
+    const raw = completion.choices[0].message.content;
 
     console.log("🧠 LLM rewrite completed");
-    console.log(rewrittenContent);
+    console.log(raw);
 
     let parsed;
-
     try {
-      parsed = JSON.parse(rewrittenContent);
+      const jsonString = extractJSON(raw);
+      parsed = JSON.parse(jsonString);
     } catch (error) {
+      console.error("Raw LLM output:\n", raw);
+      console.log(error);
       throw new Error("LLM output is not valid JSON");
     }
-
     return parsed;
   } catch (error) {
     console.error("❌ LLM rewrite failed:", error.message);

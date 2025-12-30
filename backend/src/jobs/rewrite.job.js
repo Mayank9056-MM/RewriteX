@@ -23,13 +23,15 @@ async function rewriteJob() {
       console.log("📝 Processing:", article.title);
 
       const referenceLinks = await searchGoogle(article.title);
-      if (referenceLinks.length < 2) continue;
+      if (referenceLinks.length < 1) continue;
 
       const referenceArticles = [];
+      let links = [];
 
       for (const link of referenceLinks) {
         const content = await scrapeExternalArticle(link);
-        if (content) referenceArticles.push({ url: link, content });
+        if (content) referenceArticles.push(content);
+        links.push(link);
       }
 
       if (referenceArticles.length < 2) continue;

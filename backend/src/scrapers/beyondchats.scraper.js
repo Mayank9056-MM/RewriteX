@@ -4,6 +4,7 @@ import * as cheerio from "cheerio";
 import mongoose from "mongoose";
 import connectDB from "../db/db.js";
 import Article from "../models/article.model.js";
+import { cleanHtml } from "../utils/cleanHtml.js";
 
 const BASE_URL = "https://beyondchats.com/blogs/";
 
@@ -35,18 +36,19 @@ async function scrapeArticle(url) {
 
     console.log("Published at:", publishedAt);
 
-    const content = $(".elementor-widget-theme-post-content")
-      .find("p, h2, h3, ul, ol, li")
-      .map((_, el) => $(el).text().trim())
-      .get()
-      .filter((text) => text.length > 0)
-      .join("\n\n");
+    const contentContainer = $(".elementor-widget-theme-post-content").first();
+
+    // Remove unwanted elements (ads, scripts, etc.)
+    contentContainer.find("script, style, iframe").remove();
+
+    // Get clean HTML
+    const content = contentContainer.html()?.trim();
 
     console.log("Content:", content.slice(0, 200), "...");
 
     return {
       title,
-      content,
+      content: cleanHtml(content),
       author,
       publishedAt,
       sourceUrl: url,

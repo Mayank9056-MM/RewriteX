@@ -34,7 +34,6 @@ const articleSchema = new mongoose.Schema(
     },
     sourceUrl: {
       type: String,
-      unique: true,
       index: true,
     },
     references: {

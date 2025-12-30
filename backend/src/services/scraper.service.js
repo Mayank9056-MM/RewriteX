@@ -55,7 +55,7 @@ export default async function scrapeExternalArticle(url) {
 
     console.log("Extracted content length:", content.length);
 
-    if (!content || content.length < 200) {
+    if (!content || content.length < 100) {
       console.log("⚠️ Content too short — skipping");
       return "";
     }

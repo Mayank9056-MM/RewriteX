@@ -19,6 +19,8 @@ const DOMAIN_BLACKLIST = [
   "reddit.com",
   "twitter.com",
   "linkedin.com",
+  "beyondchats.com",
+  "fabcomlive.com"
 ];
 
 /**
