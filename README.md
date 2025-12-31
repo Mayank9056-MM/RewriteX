@@ -27,6 +27,9 @@ RewriteX solves these problems by:
 - Preserving original articles while saving AI-enhanced versions
 - Enforcing strict JSON output contracts from LLMs
 
+## 🔗 Live Link
+[RewriteX – Live Demo](https://rewrite-x-blond.vercel.app/)
+
 ## Tech Stack
 
 ### Backend
